@@ -1,35 +1,14 @@
+#include "tools.h"
 
-//#include <linux/kernel.h>
-//#include <linux/fs.h>
+// #include "commandes.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <string.h>
 
-#include "commandes.h"
-#define BUFFERSIZE      255
-
-int main(int argc, char *argv[]) {
+int main() {
          int fd = open("/dev/commandes_ioctl", O_RDONLY);
         char buf[255];
-        char *text = calloc(1,1), buffer[BUFFERSIZE];
-
-         //    printf("Enter a message: \n");
+        char buffer[BUFFERSIZE];
 
         while( fgets(buffer, BUFFERSIZE , stdin) ) {
-
-                  if(text == NULL) {
-                        fprintf(stderr, "error realloc\n");
-                        return EXIT_FAILURE;
-                  }
-                  strcat(text, buffer);
-                  
-                  
                   if(strncmp("LIST", buffer, 4) == 0) {
                         
                        /* if (ioctl(fd, LIST, buf) == 0)
@@ -37,10 +16,16 @@ int main(int argc, char *argv[]) {
                         else
                                 fprintf(stderr, "ERREUR LIST\n");*/
                         fprintf(stderr, "LIST command\n");
+                  } else if(strncmp("KILL ", buffer, 5) == 0) {
+                        int sig, pid;
+                        if(!get_kill_params(buffer, &sig, &pid)) {
+                                fprintf(stderr, "Usage : kill <signal> <pid>\n");
+                                continue;
+                        }
+                  
+                        fprintf(stderr, "KILL.\n");
                   } /*else if(strncmp("FG", text, 4) == 0) {
                         fprintf(stderr, "FG\n");
-                  } else if(strncmp("KILL", text, 4) == 0) {
-                        fprintf(stderr, "KILL.\n");
                   } else if(strncmp("WAIT", text, 4) == 0) {
                         fprintf(stderr, "Commande inconnue.\n");
                   } else if(strncmp("MEMINFO", text, 4) == 0) {
@@ -48,7 +33,7 @@ int main(int argc, char *argv[]) {
                   } else if(strncmp("MODINFO", text, 4) == 0) {
                         fprintf(stderr, "Commande inconnue.\n");
                   }*/ else {
-                        fprintf(stderr, "Commande inconnue.\n");
+                        fprintf(stderr, "Commande '%s' inconnue.\n", buffer);
                   }
                   
                 /* printf("%s\n", buffer); */
