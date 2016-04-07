@@ -23,6 +23,8 @@ int main() {
                                 continue;
                         }
                   
+                        if(ioctl(fd, LIST, buf) == 0) 
+                  
                         fprintf(stderr, "KILL.\n");
                   } /*else if(strncmp("FG", text, 4) == 0) {
                         fprintf(stderr, "FG\n");

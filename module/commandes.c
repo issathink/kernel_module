@@ -29,8 +29,9 @@ static int id_last = 0;
 
 struct work_task {
 	int id;
-	struct file *fd;
-	char *buf;
+	void *first;
+	void *sec;
+	int is_bg;
 	struct work_struct real_work;
 	struct list_head list;
 } work_task;
@@ -46,7 +47,9 @@ static void thread_list(struct work_struct *work);
 
 struct global *glbl;
 
-static void thread
+static void thread_kill(struct work_struct *work_arg) {
+        struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
+}
 
 static void thread_list(struct work_struct *work_arg){
 	struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
@@ -61,10 +64,12 @@ static void thread_list(struct work_struct *work_arg){
 	list_for_each_entry(tmp_wt,&(glbl->head) ,list){
 	        pr_info("Commande id : %d!\n", tmp_wt->id);
 		scnprintf(tmp, 255, "commande id : %d!",tmp_wt->id);
-		res= copy_to_user((char *) c_ptr->buf, tmp, strlen(tmp)+1);
+		/*res= copy_to_user((char *) c_ptr->sec, tmp, strlen(tmp)+1);
 		if(res == 0)
-		        goto copy_pb;
+		        goto copy_pb;*/
+		
 	}
+	fprintf(c_ptr->first, "Nopa\n");
 	mutex_unlock(&glbl->mut);
 	
 	pr_info("COMMAND LIST END\n");
@@ -79,11 +84,21 @@ static void thread_list(struct work_struct *work_arg){
 	        return;
 }
 
-void list_handler(struct file *fichier, void *buf) {
+void list_handler(struct file *fichier, no_data *data) {
 	struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
 	INIT_WORK(&wt->real_work, thread_list);
-	wt->fd = fichier;
-	wt->buf = (char*) buf;
+	wt->first = fichier;
+	// wt->sec = (char*) buf;
+	wt->is_bg = data->is_bg;
+	schedule_work(&wt->real_work);
+}
+
+void kill_handler(struct file *fichier, kill_data* data) {
+        struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
+	INIT_WORK(&wt->real_work, thread_kill);
+	wt->first = fichier;
+	// wt->sec = (char*) buf;
+	wt->is_bg = data->is_bg;
 	schedule_work(&wt->real_work);
 }
 
@@ -94,8 +109,11 @@ long commandes_ioctl(struct file *fichier, unsigned int req, unsigned long buf) 
 	switch(req)
 	{
 		case LIST:
-			list_handler(fichier, (void *)buf);
+			list_handler(fichier, (no_data *)buf);
 			return 0; 
+		case KILL:
+		        kill_handler(fichier, (kill_data*) buf);
+		        return 0;
 		default:
 			pr_info("Commande inconnue: %s\n", (char*) buf);
 			return -ENOTTY;
