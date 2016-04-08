@@ -5,10 +5,10 @@
 
 int main() {
          int fd = open("/dev/commandes_ioctl", O_RDONLY);
-        char buf[255];
-        char buffer[BUFFERSIZE];
+        // char buf[255];
+        char buffer[BUFFER_SIZE];
 
-        while( fgets(buffer, BUFFERSIZE , stdin) ) {
+        while( fgets(buffer, BUFFER_SIZE , stdin) ) {
                   if(strncmp("LIST", buffer, 4) == 0) {
                         
                        /* if (ioctl(fd, LIST, buf) == 0)
@@ -18,14 +18,21 @@ int main() {
                         fprintf(stderr, "LIST command\n");
                   } else if(strncmp("KILL ", buffer, 5) == 0) {
                         int sig, pid;
+                        kill_data *data = malloc(sizeof(kill_data));
+                        
                         if(!get_kill_params(buffer, &sig, &pid)) {
                                 fprintf(stderr, "Usage : kill <signal> <pid>\n");
                                 continue;
                         }
-                  
-                        if(ioctl(fd, LIST, buf) == 0) 
-                  
-                        fprintf(stderr, "KILL.\n");
+                        data->pid = pid;
+                        data->sig = sig;
+                        
+                        if(ioctl(fd, KILL, data) == 0) {
+                                fprintf(stderr, "KILL OK.\n");
+                                fprintf(stderr, "Chaine: '%s'\n", data->buf);
+                        } else { 
+                                fprintf(stderr, "Error kill\n");
+                        }        
                   } /*else if(strncmp("FG", text, 4) == 0) {
                         fprintf(stderr, "FG\n");
                   } else if(strncmp("WAIT", text, 4) == 0) {
