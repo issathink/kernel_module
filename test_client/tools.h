@@ -6,6 +6,7 @@
 #include <ctype.h>
 #include <fcntl.h>
 #include <string.h>
+#include <unistd.h>
 
 #define BUFFER_SIZE                            1024
 #define NUM_MAGIQUE_HELLO           'I'
@@ -23,13 +24,13 @@ typedef struct _wait_data {
 } wait_data;
 
 typedef struct _modinfo_data {
-        char *name;
+        char name[100];
         int is_bg;
         char buf[BUFFER_SIZE];
 } modinfo_data;
 
 typedef struct _fg_data {
-        char *name;
+        int cmd_id;
         int is_bg;
         char buf[BUFFER_SIZE];
 } fg_data;

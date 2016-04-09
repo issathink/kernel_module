@@ -35,8 +35,17 @@ int get_kill_params(char *buffer, int *sig, int *pid) {
         if (errno == ERANGE || (errno != 0 && *sig == 0)) return 0;
         *pid = strtol(pid_c, &endptr, 10);
         if (errno == ERANGE || (errno != 0 && *pid == 0)) return 0;
-        fprintf(stderr, "Yep c'est des entiers");
         
+        return 1;
+}
+
+int get_modinfo_param(char *buffer, char *name) {
+        int i=0;
+        
+        if (sscanf(buffer, "MODINFO %s\n", name) == EOF)
+                return 0;
+              
+        fprintf(stderr, "modinfo name: %s\n", name);
         return 1;
 }
 
