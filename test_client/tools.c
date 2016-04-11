@@ -5,8 +5,8 @@
 #include <errno.h>
 
 /* 
- * Fonction pour verifier si la chaine passee en parametre  est un entier. 
- * return valeur non nulle si la chaine est composee d'eniters 0 sinon
+ * Check if buf is a string of digits.
+ * return 1 everything is OK, 0 otherwise
  */
 int is_string_entier(char *buf) {
         unsigned int i;
@@ -19,8 +19,8 @@ int is_string_entier(char *buf) {
 }
 
 /* 
- * Rempli les variables sig et pid en parsant la chaine buffer.
- * return valeur non nulle si la chaine respecte la syntaxe du kill 0 sinon
+ * Parse buffer and fill sig and pid.
+ * return non zero value if OK, 0 otherwise
  */
 int get_kill_params(char *buffer, int *sig, int *pid) {
         char sig_c[20], pid_c[20], *endptr;
@@ -39,13 +39,38 @@ int get_kill_params(char *buffer, int *sig, int *pid) {
         return 1;
 }
 
+/*
+ * Fill in name with the first parameter of modinfo.
+ * return 1 everything is OK, 0 otherwise
+ */
 int get_modinfo_param(char *buffer, char *name) {
-        int i=0;
-        
         if (sscanf(buffer, "MODINFO %s\n", name) == EOF)
                 return 0;
               
         fprintf(stderr, "modinfo name: %s\n", name);
         return 1;
+}
+
+int get_wait_params(char *buffer, char *params[], int size) {
+        return 0;
+}
+
+/*
+ * Self explanatory.
+ */
+int get_wait_number_of_params(char *buffer) {
+        int i = 4, j = 0;
+        
+        while (buffer[i] != ' ') i++;
+        if(j == '\0') return 0;
+        
+        j = 1;
+        while (buffer[i] != '\0') {
+                if(buffer[i] == ' ' || buffer[i] == '\n')
+                        j++;
+                i++;
+        }
+        
+        return j;
 }
 

@@ -6,8 +6,9 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR(AUTHOR);
 MODULE_DESCRIPTION(DESC);
+MODULE_VERSION("1.0");
 
-static int id_last = 0;
+// static int id_last = 0;
 
 struct work_task {
 	int id;
@@ -36,13 +37,13 @@ struct global *glbl;
  ***************************************************************/
 static void thread_kill(struct work_struct *work_arg)
 {
-        int ret_code;
-        char tmp[255];
+        int ret_code, res;
+        char tmp[BUFFER_SIZE];
         struct pid *pid_val;
         struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
         
-        scnprintf(tmp, 15, "Je vais print");
-        copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
+        scnprintf(tmp, BUFFER_SIZE, "Je vais print");
+        res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
 
         pid_val = find_get_pid(*(int*)c_ptr->first);
         if (pid_val == NULL) {
@@ -81,6 +82,7 @@ int kill_handler(struct file *fichier, kill_data *data)
  ***************************************************************/
 static void thread_meminfo(struct work_struct *work_arg)
 {
+        int res;
         struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
         char tmp[BUFFER_SIZE];
         struct sysinfo val;
@@ -88,7 +90,7 @@ static void thread_meminfo(struct work_struct *work_arg)
         // si_swapinfo(&val); /** patcher le noyau en exportant la fonction **/
         
         scnprintf(tmp, BUFFER_SIZE, "Total RAM: %ld kB\nShared RAM: %ld kB\nFree RAM: %ld kB\nBuffer RAM: %ld kB\nTotal high pages: %ld kB\nFree high pages: %ld kB\nPage size: %d kB\nFree swap: %ld kB\nTotal swap: %ld kB\n", val.totalram, val.sharedram, val.freeram, val.bufferram, val.totalhigh, val.freehigh, val.mem_unit, val.freeswap, val.totalswap);
-        copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
+        res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
 }
 
  int meminfo_handler(struct file *file, no_data *data) 
@@ -113,20 +115,35 @@ static void thread_modinfo(struct work_struct *work_arg)
 {
         struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
         struct module *mod;
-        mod = find_module();
+        char tmp[BUFFER_SIZE];
+        int res;
+        
+        res = copy_from_user(tmp, (char*)c_ptr->first, strlen(c_ptr->first)+1);
+        mod = find_module(tmp);
+        
+        if(mod == NULL) {
+                c_ptr->ret_code = -1;
+                res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
+                return;
+        }
+        res = scnprintf(tmp, BUFFER_SIZE, "Name: %s\nVersion: %s\nArgs: %s\nLoad adress: %p\n", mod->name, mod->version, mod->args, mod);
+        res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
+        c_ptr->ret_code = 0;
+        pr_info("thread_modinfo END.\n");  
 }
 
-int modinfo_handler(struct file *file, no_data *data) 
+int modinfo_handler(struct file *file, modinfo_data *data) 
 {
         struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
         INIT_WORK(&wt->real_work, thread_modinfo);
+        wt->first = data->name;
         wt->thir = data->buf;
         wt->is_bg = data->is_bg;
         schedule_work(&wt->real_work);
 	flush_work(&wt->real_work);
 	
-        pr_info("Meminfo ret_code: %d\n", wt->ret_code);
-	return 0;
+        pr_info("Modinfo ret_code: %d\n", wt->ret_code);
+	return wt->ret_code;
 }
 /************************** END MEMINFO *************************/
 
@@ -137,7 +154,7 @@ static void thread_list(struct work_struct *work_arg)
 {
 	struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
 	struct work_task *tmp_wt;
-	char tmp[255];
+	char tmp[BUFFER_SIZE];
 	int res; 
 	
 	pr_info("COMMAND LIST TRACE\n");
@@ -146,10 +163,10 @@ static void thread_list(struct work_struct *work_arg)
 	mutex_lock(&glbl->mut);
 	list_for_each_entry(tmp_wt,&(glbl->head) ,list){
 	        pr_info("Commande id : %d!\n", tmp_wt->id);
-		scnprintf(tmp, 255, "commande id : %d!",tmp_wt->id);
-		/*res= copy_to_user((char *) c_ptr->sec, tmp, strlen(tmp)+1);
+		res = scnprintf(tmp, BUFFER_SIZE, "commande id : %d!",tmp_wt->id);
+		res= copy_to_user((char *) c_ptr->sec, tmp, strlen(tmp)+1);
 		if(res == 0)
-		        goto copy_pb;*/
+		        goto copy_pb;
 		
 	}
 	// fprintf(c_ptr->first, "Nopa\n");
@@ -190,6 +207,8 @@ long cmd_ioctl(struct file *fichier, unsigned int req, unsigned long data)
 	        return kill_handler(fichier, (kill_data*)data);
 	case MEMINFO:
 	        return meminfo_handler(fichier, (no_data*)data);
+	case MODINFO:
+	        return modinfo_handler(fichier, (modinfo_data*)data);
 	default:
 		pr_info("Commande inconnue: %s\n", (char*) data);
 		return -ENOTTY;

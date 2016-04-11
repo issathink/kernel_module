@@ -1,8 +1,5 @@
 #include "tools.h"
 
-// #include "commandes.h"
-
-
 int main() {
          int fd = open("/dev/commandes_ioctl", O_RDONLY);
         // char buf[255];
@@ -12,7 +9,7 @@ int main() {
                   if (strncmp("LIST", buffer, 4) == 0) {
                         no_data *data = malloc(sizeof(no_data));
                        if (ioctl(fd, LIST, data) == 0)
-                                fprintf(stderr, "%s\n", buf);
+                                fprintf(stderr, "%s\n", data->buf);
                         else
                                 fprintf(stderr, "ERREUR LIST\n\n");
                         free(data);
@@ -54,7 +51,7 @@ int main() {
                                 fprintf(stderr, "Unexpected error.\n");
                         }
                         free(data);
-                  } else if (strncmp("MODINFO", text, 7) == 0) {
+                  } else if (strncmp("MODINFO", buffer, 7) == 0) {
                         modinfo_data *data = malloc(sizeof(modinfo_data));
                         
                         if (!get_modinfo_param(buffer, data->name)) {
@@ -70,7 +67,7 @@ int main() {
                         }
                         free(data);
                   } else {
-                        fprintf(stderr, "Commande '%s' inconnue.\n", buffer);
+                        fprintf(stderr, "Unknown command:  '%s'\n", buffer);
                   }
                   
                 /* printf("%s\n", buffer); */
