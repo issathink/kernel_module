@@ -55,11 +55,27 @@ int get_wait_params(char *buffer, char *params[], int size) {
         return 0;
 }
 
-/*
- * Self explanatory.
- */
+/*** Self explanatory. ***/
+int get_wait_params_size(char *buffer) {
+        int i = 0, size = 0;
+        
+        while (buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\0') i++;
+        if(buffer[i] == '\0' || buffer[i] == '\n') return 0;
+        
+        size = 0; i++;
+        while (buffer[i] != '\0') {
+                if((buffer[i] == ' ' || buffer[i] == '\n'))
+                        if((buffer[i+1] != '\0' && buffer[i+1] == '\n'))
+                                size++;
+                i++;
+        }
+        
+        return size;
+}
+
+/*** Self explanatory. ***/
 int get_wait_number_of_params(char *buffer) {
-        int i = 4, j = 0;
+        int i = 0, j = 0;
         
         while (buffer[i] != ' ') i++;
         if(j == '\0') return 0;

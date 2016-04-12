@@ -40,9 +40,13 @@ int main() {
                         free(data);
                   } /*else if (strncmp("FG", text, 4) == 0) {
                         fprintf(stderr, "FG\n");
-                  } else if (strncmp("WAIT", text, 4) == 0) {
-                        fprintf(stderr, "Commande inconnue.\n");
-                  } */ else if (strncmp("MEMINFO", buffer, 7) == 0) {
+                  } */ else if (strncmp("WAIT", buffer, 4) == 0) {
+                        int size;
+                       
+                        size = get_wait_params_size(buffer);
+                        fprintf(stderr, "wait %s, size: %d\n", buffer, size);
+                        
+                  } else if (strncmp("MEMINFO", buffer, 7) == 0) {
                         no_data *data = malloc(sizeof(no_data));
                         
                         if (ioctl(fd, MEMINFO, data) == 0) {
