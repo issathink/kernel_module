@@ -195,6 +195,15 @@ void list_handler(struct file *fichier, no_data *data)
 }
 /************************** END LIST ****************************/
 
+int wait_handler(struct file *fichier, wait_data *data)
+{
+        struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
+	INIT_WORK(&wt->real_work, thread_list);
+	
+	
+        return wt->ret_code;
+}
+
 long cmd_ioctl(struct file *fichier, unsigned int req, unsigned long data)
 {
 	//int res;
@@ -209,6 +218,8 @@ long cmd_ioctl(struct file *fichier, unsigned int req, unsigned long data)
 	        return meminfo_handler(fichier, (no_data*)data);
 	case MODINFO:
 	        return modinfo_handler(fichier, (modinfo_data*)data);
+	case WAIT:
+	        return wait_handler(fichier, (wait_data*)data);
 	default:
 		pr_info("Commande inconnue: %s\n", (char*) data);
 		return -ENOTTY;

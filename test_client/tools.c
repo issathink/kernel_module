@@ -51,8 +51,40 @@ int get_modinfo_param(char *buffer, char *name) {
         return 1;
 }
 
-int get_wait_params(char *buffer, char *params[], int size) {
-        return 0;
+int get_wait_params(char *buffer, int params[], int *size) {
+        int i = 0, j = 0, ind = 0, nb = 0;
+        char tmp[11], *endptr;
+        
+        memset(tmp, 0, 11);
+        while (buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\0') i++;
+        if(buffer[i] == '\0' || buffer[i] == '\n') return 0;
+
+        while (buffer[i] != '\n' && buffer[i] != '\0') {
+                ind = 0;
+                if(buffer[i] == ' ') {
+                        i++;
+                        while(buffer[i] != ' ' && buffer[i] != '\n' && ind <= 10)
+                                tmp[ind++] = buffer[i++];
+
+                        if (ind > 10) {
+                                i++;
+                                // fprintf(stderr, "Ignored %s\n", tmp);
+                        } else if (buffer[i] == ' ' || buffer[i] == '\n') {                                
+                                if (!is_string_entier(tmp)) {
+                                        // fprintf(stderr, "Ignored %s\n", tmp);
+                                 } else { 
+                                        params[j++] = strtol(tmp, &endptr, 10);
+                                       //  fprintf(stderr, "params[%d] = %d\n", j, params[j-1]);
+                                 }
+                        } else {
+                                fprintf(stderr, "What %c\n", buffer[i]);
+                                i++;
+                        }
+                }
+                memset(tmp, 0, 11);
+        }
+        *size = j;
+        return j;
 }
 
 /*** Self explanatory. ***/

@@ -41,10 +41,18 @@ int main() {
                   } /*else if (strncmp("FG", text, 4) == 0) {
                         fprintf(stderr, "FG\n");
                   } */ else if (strncmp("WAIT", buffer, 4) == 0) {
-                        int size;
-                       
-                        size = get_wait_params_size(buffer);
-                        fprintf(stderr, "wait %s, size: %d\n", buffer, size);
+                        int size, i, params[10];
+                        
+                        size = get_wait_params(buffer, params, &size);
+                        
+                        if (size <= 0) {
+                                fprintf(stderr, "Usage : wait <pid> [<pid> ...]\n");
+                                continue;
+                        }
+                        
+                       // for (i=0; i<size; i++)
+                       //         fprintf(stderr, "params[%d] = %d ", i, params[i]);
+                       // fprintf(stderr, "\ncmd: %s, size: %d\n", buffer, size);
                         
                   } else if (strncmp("MEMINFO", buffer, 7) == 0) {
                         no_data *data = malloc(sizeof(no_data));
