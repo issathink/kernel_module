@@ -22,6 +22,7 @@
 
 #define NB_MAX_PID      10
 #define BUFFER_SIZE      1024
+#define NAME_SIZE         100
 
 typedef struct _kill_data {
         int pid;
@@ -31,11 +32,13 @@ typedef struct _kill_data {
 
 typedef struct _wait_data {
         int pids[NB_MAX_PID];
+        int is_bg;
         char buf[BUFFER_SIZE];
+        
 } wait_data;
 
 typedef struct _modinfo_data {
-        char name[100];
+        char name[NAME_SIZE];
         int is_bg;
         char buf[BUFFER_SIZE];
 } modinfo_data;

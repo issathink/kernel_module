@@ -41,15 +41,26 @@ int main() {
                   } /*else if (strncmp("FG", text, 4) == 0) {
                         fprintf(stderr, "FG\n");
                   } */ else if (strncmp("WAIT", buffer, 4) == 0) {
-                        int size, i, params[10];
+                        int size, i, ret_code;
+                        wait_data *data = malloc(sizeof(wait_data));
                         
-                        size = get_wait_params(buffer, params, &size);
-                        
+                        for(i=0; i<NB_MAX_PID; i++)
+                                data->pids[i] = 0;
+                        size = get_wait_params(buffer, data->pids, &size);
                         if (size <= 0) {
                                 fprintf(stderr, "Usage : wait <pid> [<pid> ...]\n");
+                                free(data);
                                 continue;
                         }
                         
+                        if ((ret_code = ioctl(fd, WAIT, data)) == 0) {
+                                fprintf(stderr, "End wait: %d.\n\n", ret_code);
+                        } else if (ret_code == -1) {
+                                fprintf(stderr, "%s\n", data->buf);
+                        } else {
+                                fprintf(stderr, "Oups unexpected error.\n");
+                        }
+                        free(data);
                        // for (i=0; i<size; i++)
                        //         fprintf(stderr, "params[%d] = %d ", i, params[i]);
                        // fprintf(stderr, "\ncmd: %s, size: %d\n", buffer, size);

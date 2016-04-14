@@ -195,12 +195,54 @@ void list_handler(struct file *fichier, no_data *data)
 }
 /************************** END LIST ****************************/
 
+/* **************************************************************
+ ************************ Commande WAIT **************************
+ ***************************************************************/
+ static void thread_wait(struct work_struct *work_arg)
+{
+        struct task_struct *task;
+        struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
+        int i, pid, c_pid;
+        char *tmp, *buf;
+        bool alive = false;
+        pid = -1;
+        tmp = kmalloc(NAME_SIZE, GFP_KERNEL);
+        buf = kmalloc(BUFFER_SIZE, GFP_KERNEL);
+
+        for(i=0; i<NB_MAX_PID; i++) {
+                c_pid = c_ptr->first[i];
+        
+                if (c_pid > 0) {
+                        task = get_pid_task(c_pid, PIDTYPE_PID);
+	                if (!task) {
+	                        c_ptr->first[i] = 0;
+		                pr_err("can't find task for pid %u\n", pid_nr(task->pid));
+		                goto out;
+	                }
+                        pr_info("Waiting for pid: %d\n", c_pid);
+                        task_lock(task);
+	                alive = pid_alive(task);
+	                if (!alive) {
+		                 pid = c_pid;    
+		        }
+	                task_unlock(task);
+	                put_task_struct(task);
+                } else {
+                        pr_info("Oh no pid: %d\n", pid);
+                        
+                }
+        }
+}
+
 int wait_handler(struct file *fichier, wait_data *data)
 {
         struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
-	INIT_WORK(&wt->real_work, thread_list);
-	
-	
+	INIT_WORK(&wt->real_work, thread_wait);
+	wt->first = data->pids;
+	wt->thir = data->buf;
+	wt->is_bg = data->is_bg;
+	schedule_work(&wt->real_work);
+	flush_work(&wt->real_work);
         return wt->ret_code;
 }
 

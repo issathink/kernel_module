@@ -4,6 +4,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include "tools.h"
+
 /* 
  * Check if buf is a string of digits.
  * return 1 everything is OK, 0 otherwise
@@ -52,10 +54,10 @@ int get_modinfo_param(char *buffer, char *name) {
 }
 
 int get_wait_params(char *buffer, int params[], int *size) {
-        int i = 0, j = 0, ind = 0, nb = 0;
-        char tmp[11], *endptr;
+        int i = 0, j = 0, ind = 0;
+        char tmp[NB_MAX_PID+1], *endptr;
         
-        memset(tmp, 0, 11);
+        memset(tmp, 0, NB_MAX_PID+1);
         while (buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\0') i++;
         if(buffer[i] == '\0' || buffer[i] == '\n') return 0;
 
@@ -63,10 +65,10 @@ int get_wait_params(char *buffer, int params[], int *size) {
                 ind = 0;
                 if(buffer[i] == ' ') {
                         i++;
-                        while(buffer[i] != ' ' && buffer[i] != '\n' && ind <= 10)
+                        while(buffer[i] != ' ' && buffer[i] != '\n' && ind <= NB_MAX_PID)
                                 tmp[ind++] = buffer[i++];
 
-                        if (ind > 10) {
+                        if (ind > NB_MAX_PID) {
                                 i++;
                                 // fprintf(stderr, "Ignored %s\n", tmp);
                         } else if (buffer[i] == ' ' || buffer[i] == '\n') {                                
@@ -81,7 +83,7 @@ int get_wait_params(char *buffer, int params[], int *size) {
                                 i++;
                         }
                 }
-                memset(tmp, 0, 11);
+                memset(tmp, 0, NB_MAX_PID+1);
         }
         *size = j;
         return j;
