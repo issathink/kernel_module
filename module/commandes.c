@@ -8,7 +8,7 @@ MODULE_AUTHOR(AUTHOR);
 MODULE_DESCRIPTION(DESC);
 MODULE_VERSION("1.0");
 
-// static int id_last = 0;
+/* static int id_last = 0; */
 
 struct work_task {
 	int id;
@@ -18,15 +18,15 @@ struct work_task {
 	int is_bg;
 	int ret_code;
 	struct work_struct real_work;
+	struct delayed_work dwork;
 	struct list_head list;
 } work_task;
 
 struct global {
 	int size;	
 	struct list_head head;
-	struct mutex mut;	
+	struct mutex mut;
 }  global;
-
 
 static void thread_list(struct work_struct *work);
 
@@ -40,8 +40,8 @@ static void thread_kill(struct work_struct *work_arg)
         int ret_code, res;
         char tmp[BUFFER_SIZE];
         struct pid *pid_val;
-        struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
-        
+        struct work_task *c_ptr = container_of(work_arg, struct work_task,
+                                                        real_work);
         scnprintf(tmp, BUFFER_SIZE, "Je vais print");
         res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
 
@@ -73,6 +73,7 @@ int kill_handler(struct file *fichier, kill_data *data)
 	flush_work(&wt->real_work);
 
         pr_info("Kill ret_code: %d\n", wt->ret_code);
+        kfree(wt);
 	return wt->ret_code;
 }
 /**************************** END KILL ***************************/
@@ -83,7 +84,8 @@ int kill_handler(struct file *fichier, kill_data *data)
 static void thread_meminfo(struct work_struct *work_arg)
 {
         int res;
-        struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
+        struct work_task *c_ptr = container_of(work_arg, struct work_task, 
+                                                        real_work);
         char tmp[BUFFER_SIZE];
         struct sysinfo val;
         si_meminfo(&val);
@@ -113,7 +115,8 @@ static void thread_meminfo(struct work_struct *work_arg)
  ***************************************************************/
 static void thread_modinfo(struct work_struct *work_arg)
 {
-        struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
+        struct work_task *c_ptr = container_of(work_arg, struct work_task, 
+                                                        real_work);
         struct module *mod;
         char tmp[BUFFER_SIZE];
         int res;
@@ -121,7 +124,7 @@ static void thread_modinfo(struct work_struct *work_arg)
         res = copy_from_user(tmp, (char*)c_ptr->first, strlen(c_ptr->first)+1);
         mod = find_module(tmp);
         
-        if(mod == NULL) {
+        if (mod == NULL) {
                 c_ptr->ret_code = -1;
                 res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
                 return;
@@ -143,6 +146,7 @@ int modinfo_handler(struct file *file, modinfo_data *data)
 	flush_work(&wt->real_work);
 	
         pr_info("Modinfo ret_code: %d\n", wt->ret_code);
+        kfree(wt);
 	return wt->ret_code;
 }
 /************************** END MEMINFO *************************/
@@ -152,13 +156,14 @@ int modinfo_handler(struct file *file, modinfo_data *data)
  ***************************************************************/
 static void thread_list(struct work_struct *work_arg)
 {
-	struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
+	struct work_task *c_ptr = container_of(work_arg, struct work_task, 
+	                                                real_work);
 	struct work_task *tmp_wt;
 	char tmp[BUFFER_SIZE];
 	int res; 
 	
 	pr_info("COMMAND LIST TRACE\n");
-	//printk(KERN_INFO "[Deferred work]=> PID: %d; NAME: %s task ID: %d\n", current->pid, current->comm);
+	/* printk(KERN_INFO "[Deferred work]=> PID: %d; NAME: %s task ID: %d\n", current->pid, current->comm); */
 	
 	mutex_lock(&glbl->mut);
 	list_for_each_entry(tmp_wt,&(glbl->head) ,list){
@@ -169,15 +174,15 @@ static void thread_list(struct work_struct *work_arg)
 		        goto copy_pb;
 		
 	}
-	// fprintf(c_ptr->first, "Nopa\n");
+	/* fprintf(c_ptr->first, "Nopa\n"); */
 	mutex_unlock(&glbl->mut);
 	
 	pr_info("COMMAND LIST END\n");
 	return;
-	// printk(KERN_INFO "[Deferred work]=> I am going to sleep 2 seconds\n");
-	// set_current_state(TASK_INTERRUPTIBLE);
-	// schedule_timeout(2 * HZ); //Wait 2 seconds
-	// return;
+	/* printk(KERN_INFO "[Deferred work]=> I am going to sleep 2 seconds\n"); */
+	/* set_current_state(TASK_INTERRUPTIBLE); */
+	/* schedule_timeout(2 * HZ); //Wait 2 seconds */
+	/* return; */
 	copy_pb:
 	        mutex_unlock(&glbl->mut);
 	        pr_info("ERROR\n");
@@ -192,6 +197,8 @@ void list_handler(struct file *fichier, no_data *data)
 	wt->thir = data->buf;
 	wt->is_bg = data->is_bg;
 	schedule_work(&wt->real_work);
+	flush_work(&wt->real_work);
+	kfree(wt);
 }
 /************************** END LIST ****************************/
 
@@ -201,8 +208,10 @@ void list_handler(struct file *fichier, no_data *data)
  static void thread_wait(struct work_struct *work_arg)
 {
         struct task_struct *task;
-        struct work_task *c_ptr = container_of(work_arg, struct work_task, real_work);
-        int i, pid, c_pid;
+        struct pid *p;
+        struct work_task *c_ptr = container_of(work_arg, struct work_task, 
+                                                                real_work);
+        int i, pid, c_pid, status;
         char *tmp, *buf;
         bool alive = false;
         pid = -1;
@@ -210,28 +219,47 @@ void list_handler(struct file *fichier, no_data *data)
         buf = kmalloc(BUFFER_SIZE, GFP_KERNEL);
 
         for(i=0; i<NB_MAX_PID; i++) {
-                c_pid = c_ptr->first[i];
+                c_pid = (int)((int *)(c_ptr->first))[i];
+                p = find_get_pid(c_pid);
         
                 if (c_pid > 0) {
-                        task = get_pid_task(c_pid, PIDTYPE_PID);
+                        task = get_pid_task(p, PIDTYPE_PID);
 	                if (!task) {
-	                        c_ptr->first[i] = 0;
-		                pr_err("can't find task for pid %u\n", pid_nr(task->pid));
-		                goto out;
+	                        ((int *)(c_ptr->first))[i] = 0;
+		                pr_err("can't find task for pid %u\n", pid_nr(p));
+		                put_pid(p);
+		                put_task_struct(task);
+		                continue;
 	                }
                         pr_info("Waiting for pid: %d\n", c_pid);
                         task_lock(task);
 	                alive = pid_alive(task);
 	                if (!alive) {
-		                 pid = c_pid;    
+		                 pid = c_pid;
+		                 status = task->exit_code;
+		                 c_ptr->ret_code = 0;
+		                 goto out;
 		        }
 	                task_unlock(task);
 	                put_task_struct(task);
                 } else {
                         pr_info("Oh no pid: %d\n", pid);
-                        
                 }
+                put_pid(p);
         }
+        
+        INIT_DELAYED_WORK(&c_ptr->dwork, thread_wait);
+        pr_info("Avant le schedule_delayed_work\n");
+        schedule_delayed_work(&c_ptr->dwork, HZ*60);
+        pr_info("Je vais delay le work oklm\n");
+        return;
+        
+out:
+        task_unlock(task);
+	put_task_struct(task);
+        put_pid(p);
+        kfree(tmp);
+        kfree(buf);
 }
 
 int wait_handler(struct file *fichier, wait_data *data)
@@ -243,12 +271,13 @@ int wait_handler(struct file *fichier, wait_data *data)
 	wt->is_bg = data->is_bg;
 	schedule_work(&wt->real_work);
 	flush_work(&wt->real_work);
+	kfree(wt);
         return wt->ret_code;
 }
 
 long cmd_ioctl(struct file *fichier, unsigned int req, unsigned long data)
 {
-	//int res;
+	/* int res; */
 	
 	switch (req) {
 	case LIST:
@@ -274,7 +303,8 @@ long cmd_ioctl(struct file *fichier, unsigned int req, unsigned long data)
             pr_err("ERRUR %i\n", res);
     } else if (req == WHO) {
         char tmp[255];
-        if ((res = copy_from_user(tmp, (char *) buf, strlen((char *) buf) + 1)) == 0) {
+        if ((res = copy_from_user(tmp, (char *) buf, strlen((char *) buf) + 1))
+        == 0) {
             scnprintf(tampon, 255, "Hello, %s!", tmp);
            
         }
@@ -300,8 +330,8 @@ static int __init entry_point(void)
 	mutex_init(&(glbl->mut));
 	INIT_LIST_HEAD(&(glbl->head));
 
-	// INIT_WORK(&glbl->real_work, thread_function);
-	// schedule_work(&test_wq->real_work);
+	/* INIT_WORK(&glbl->real_work, thread_function); */
+	/* schedule_work(&test_wq->real_work); */
 
 	pr_info("Load module major: %d\n", major);
 
