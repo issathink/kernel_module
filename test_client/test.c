@@ -48,19 +48,21 @@ int main() {
                                 data->pids[i] = 0;
                         size = get_wait_params(buffer, data->pids, &size);
                         if (size <= 0) {
-                                fprintf(stderr, "Usage : wait <pid> [<pid> ...]\n");
+                                fprintf(stderr, "Usage : WAIT <pid> [<pid> ...]\n");
                                 free(data);
                                 continue;
+                        } else if(size > 10) {
+                                fprintf(stderr, "Only ten first pids are taken in account.\n");
                         }
                         
                         if ((ret_code = ioctl(fd, WAIT, data)) == 0) {
                                 fprintf(stderr, "End wait: %d.\n\n", ret_code);
                         } else if (ret_code == -1) {
-                                fprintf(stderr, "%s\n", data->buf);
+                                fprintf(stderr, "He said %s\n", data->buf);
                         } else {
                                 fprintf(stderr, "Oups unexpected error.\n");
                         }
-                        free(data);
+                        // free(data);
                        // for (i=0; i<size; i++)
                        //         fprintf(stderr, "params[%d] = %d ", i, params[i]);
                        // fprintf(stderr, "\ncmd: %s, size: %d\n", buffer, size);

@@ -53,6 +53,10 @@ int get_modinfo_param(char *buffer, char *name) {
         return 1;
 }
 
+/*
+ * Decode buffer string and fill the params table with pids.
+ * return number of parameters 
+ */
 int get_wait_params(char *buffer, int params[], int *size) {
         int i = 0, j = 0, ind = 0;
         char tmp[NB_MAX_PID+1], *endptr;
@@ -76,6 +80,8 @@ int get_wait_params(char *buffer, int params[], int *size) {
                                         // fprintf(stderr, "Ignored %s\n", tmp);
                                  } else { 
                                         params[j++] = strtol(tmp, &endptr, 10);
+                                        if (j >= 10)
+                                                break;
                                        //  fprintf(stderr, "params[%d] = %d\n", j, params[j-1]);
                                  }
                         } else {
