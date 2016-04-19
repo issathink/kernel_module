@@ -9,7 +9,7 @@ MODULE_DESCRIPTION(DESC);
 MODULE_VERSION("1.0");
 
 /* static int id_last = 0; */
-
+global *glbl;
 
 long cmd_ioctl(struct file *fichier, unsigned int req, unsigned long data)
 {

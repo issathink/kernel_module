@@ -1,8 +1,5 @@
 #include "commandes.h"
 
-/* **************************************************************
- *********************** Commande MEMINFO ************************
- ***************************************************************/
 void thread_meminfo(struct work_struct *work_arg)
 {
         int res;
@@ -30,4 +27,3 @@ int meminfo_handler(struct file *file, no_data *data)
         pr_info("Meminfo ret_code: %d\n", wt->ret_code);
         return 0;
 }
- /************************** END MEMINFO *************************/

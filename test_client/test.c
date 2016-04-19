@@ -56,7 +56,10 @@ int main() {
                         }
                         
                         if ((ret_code = ioctl(fd, WAIT, data)) == 0) {
-                                fprintf(stderr, "End wait: %d.\n\n", ret_code);
+                                /* while(data->res) {
+                                        sleep(1);
+                                } */
+                                fprintf(stderr, "End wait: %s.\n\n", data->buf);
                         } else if (ret_code == -1) {
                                 fprintf(stderr, "He said %s\n", data->buf);
                         } else {

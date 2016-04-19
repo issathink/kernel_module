@@ -13,6 +13,7 @@ typedef struct _kill_data {
 
 typedef struct _wait_data {
         int is_bg;
+        char is_over;
         int pids[NB_MAX_PID];
         char buf[BUFFER_SIZE];
 } wait_data;

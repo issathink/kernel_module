@@ -17,6 +17,7 @@
 #include <linux/fs.h>
 #include <linux/swap.h>
 #include <linux/mm.h>
+#include <linux/wait.h>
 #include "ioctl_infos.h"
 
 #define NAME_SIZE         100
@@ -33,13 +34,13 @@ typedef struct work_task {
 	struct list_head list;
 } work_task;
 
-typedef struct global {
+typedef struct _global {
 	int size;	
 	struct list_head head;
 	struct mutex mut;
 }  global;
 
-extern struct global *glbl;
+extern global *glbl;
 
 void thread_list(struct work_struct *work);
 void list_handler(struct file *fichier, no_data *data);

@@ -1,9 +1,5 @@
 #include "commandes.h"
 
-
-/* **************************************************************
- ************************ Commande KILL ***************************
- ***************************************************************/
 void thread_kill(struct work_struct *work_arg)
 {
         int ret_code, res;
@@ -45,4 +41,3 @@ int kill_handler(struct file *fichier, kill_data *data)
         kfree(wt);
 	return wt->ret_code;
 }
-/**************************** END KILL ***************************/

@@ -1,8 +1,5 @@
 #include "commandes.h"
  
-/* **************************************************************
- *********************** Commande MODINFO ************************
- ***************************************************************/
 void thread_modinfo(struct work_struct *work_arg)
 {
         struct work_task *c_ptr = container_of(work_arg, struct work_task, 
@@ -39,4 +36,3 @@ int modinfo_handler(struct file *file, modinfo_data *data)
         kfree(wt);
 	return wt->ret_code;
 }
-/************************** END MEMINFO *************************/

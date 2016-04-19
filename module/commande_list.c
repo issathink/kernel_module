@@ -1,8 +1,5 @@
 #include "commandes.h"
 
-/* **************************************************************
- ************************ Commande LIST ***************************
- ***************************************************************/
 void thread_list(struct work_struct *work_arg)
 {
 	struct work_task *c_ptr = container_of(work_arg, struct work_task, 
@@ -49,4 +46,3 @@ void list_handler(struct file *fichier, no_data *data)
 	flush_work(&wt->real_work);
 	kfree(wt);
 }
-/************************** END LIST ****************************/

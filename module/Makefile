@@ -3,8 +3,8 @@
 
 ifneq ($(KERNELRELEASE),)
 
-obj-m := commandes.o
-commandes-objs := commande_list.o commande_kill.o commande_meminfo.o commande_modinfo.o commande_wait.o
+obj-m := mycmd.o
+mycmd-objs := commandes.o commande_list.o commande_kill.o commande_meminfo.o commande_modinfo.o commande_wait.o
 
 else
 	
