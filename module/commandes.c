@@ -1,6 +1,6 @@
 #include "commandes.h"
 
-#define AUTHOR "Issa & Etienne <pnl@p6.io>"
+#define AUTHOR "Issa & Thomas <pnl@p6.io>"
 #define DESC   "Projet PNL"
 
 MODULE_LICENSE("GPL");
