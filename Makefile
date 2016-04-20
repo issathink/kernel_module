@@ -2,7 +2,7 @@
 
 MODULE=./module
 CLIENT=./test_client
-COMMON=./Common
+COMMON=./common
 
 KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 
