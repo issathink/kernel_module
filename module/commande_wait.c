@@ -24,25 +24,30 @@ void thread_wait(struct work_struct *work_arg)
                 c_pid = (int)((int *)(c_ptr->first))[i];
                 p = find_get_pid(c_pid);
                 
-                pr_info("Pid: %d\n", p);
                 if (c_pid > 0) {
-
+                        
                         task = get_pid_task(p, PIDTYPE_PID);
+                        
+                        //task = get_pid_task(p, PIDTYPE_PID);
+                        //pr_info("Atomic APRES : %d\n", atomic_read(&task->usage));
 	                if (!task) {
+	                        
 	                        ((int *)(c_ptr->first))[i] = 0;
 		                pr_err("can't find task for pid %d\n", c_pid);
 		                put_pid(p);
-		                if (task != NULL) {
-                                        //pr_info("Wouah d: %d\n", task->exit_code);
-		                        put_task_struct(task);
-		                } else {
-                                       pr_info("NUULLLLLLLLLLLLL\n");
-                                }
-
+		                task = (struct task_struct *)(c_ptr->sec);
+		                if(!task)
+		                        pr_err("Wahahhahhzhhzhez \n");
+		                 else 
+		                        pr_err("Yessssssssssssssssss %d \n", task->exit_code);
+		                
 		                continue;
-	                }
+	                } else 
+	                        pr_info("Atomic avant : %d\n", atomic_read(&task->usage));
                         /* pr_info("Waiting for pid: %d\n", c_pid); */
+                        c_ptr->sec = task;
                         task_lock(task);
+                        set_task_state(task, TASK_TRACED);
 	                alive = pid_alive(task);
                         status = task->exit_code;
                         c_ptr->ret_code = status;
@@ -66,11 +71,11 @@ void thread_wait(struct work_struct *work_arg)
                                 pr_info("Je passe dans alive\n");
                         }
 	                task_unlock(task);
-	                put_task_struct(task);
+	                // put_task_struct(task);
                 } else {
                         no_proc++;
                 }
-                put_pid(p);
+                // put_pid(p);
         }
                 
         if(no_proc == NB_MAX_PID) {
@@ -98,6 +103,19 @@ int wait_handler(struct file *fichier, wait_data *data)
         wt->first = kmalloc(sizeof(int)*NB_MAX_PID, GFP_KERNEL);
         for(i=0; i<NB_MAX_PID; i++)
                 ((int *)wt->first)[i] = data->pids[i];
+                
+        struct pid *p;
+        struct task_struct *task;
+        int c_pid;
+        
+        for(i=0; i<NB_MAX_PID; i++) {
+                c_pid = (int)((int *)(wt->first))[i];
+                p = find_get_pid(c_pid);
+                
+                if (p) {
+                        task = get_pid_task(p, PIDTYPE_PID);
+                }
+        }
          
 	// wt->first = data->pids;
 	wt->thir = data->buf;
