@@ -15,36 +15,39 @@ void thread_wait(struct work_struct *work_arg)
         char tmp[NAME_SIZE];
         bool alive = false;
         pid = -1;
-        c_ptr->ret_code = -1;
+        //c_ptr->ret_code = -1;
         no_proc = 0;
-	
-	pr_err("Initialisation ok task_id: %d, dw: %p\n", c_ptr->id, dw);
         
         no_proc = 0;
         c_pid = 0;
         for(i=0; i<NB_MAX_PID; i++) {
-                pr_err("start boucle %d\n", (c_ptr == NULL));
                 c_pid = (int)((int *)(c_ptr->first))[i];
-                pr_err("Well c_pid %d\n", c_pid);
                 p = find_get_pid(c_pid);
                 
+                pr_info("Pid: %d\n", p);
                 if (c_pid > 0) {
+
                         task = get_pid_task(p, PIDTYPE_PID);
 	                if (!task) {
 	                        ((int *)(c_ptr->first))[i] = 0;
-		                pr_err("can't find task for pid %u\n", pid_nr(p));
+		                pr_err("can't find task for pid %d\n", c_pid);
 		                put_pid(p);
-		                if(task == NULL) {
-		                        pr_info("Pourquoi c'est null non ????\n'");
-		                } else {
+		                if (task != NULL) {
+                                        //pr_info("Wouah d: %d\n", task->exit_code);
 		                        put_task_struct(task);
-		                }
+		                } else {
+                                       pr_info("NUULLLLLLLLLLLLL\n");
+                                }
+
 		                continue;
 	                }
                         /* pr_info("Waiting for pid: %d\n", c_pid); */
                         task_lock(task);
 	                alive = pid_alive(task);
+                        status = task->exit_code;
+                        c_ptr->ret_code = status;
 	                if (!alive) {
+                                pr_info("Pas alive!\n");
 		                pid = c_pid;
 		                status = task->exit_code;
 		                c_ptr->ret_code = 0;
@@ -53,11 +56,15 @@ void thread_wait(struct work_struct *work_arg)
 		                task_unlock(task);
 	                        put_task_struct(task);
                                 put_pid(p);
+                                c_ptr->ret_code = status;
                                 is_over = 1;
                                 wake_up(&wq_t);
                                 pr_info("Someone is not alive\n");
 		                return;
-		        }
+		        }else {
+                                
+                                pr_info("Je passe dans alive\n");
+                        }
 	                task_unlock(task);
 	                put_task_struct(task);
                 } else {
@@ -67,17 +74,15 @@ void thread_wait(struct work_struct *work_arg)
         }
                 
         if(no_proc == NB_MAX_PID) {
+                pr_info("Pas trouve!\n");
                 scnprintf(tmp, BUFFER_SIZE, "No process found");
 		copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
-		c_ptr->ret_code = 0;
+		//c_ptr->ret_code = 0;
                 is_over = 1;
                 wake_up(&wq_t);
-                pr_info("Nope\n");
                 return;
         }
         
-        // INIT_DELAYED_WORK(&c_ptr->dwork, thread_wait);
-        pr_info("Avant le schedule_delayed_work\n");
         schedule_delayed_work(&c_ptr->dwork, 60);
         
 }
@@ -90,7 +95,6 @@ int wait_handler(struct file *fichier, wait_data *data)
         is_over = 0;
         INIT_DELAYED_WORK(&wt->dwork, thread_wait);
         
-
         wt->first = kmalloc(sizeof(int)*NB_MAX_PID, GFP_KERNEL);
         for(i=0; i<NB_MAX_PID; i++)
                 ((int *)wt->first)[i] = data->pids[i];
@@ -104,6 +108,6 @@ int wait_handler(struct file *fichier, wait_data *data)
 	wait_event(wq_t, is_over);
 	
 	/*kfree(wt);*/
-	pr_info("i'm out %d\n", wt->ret_code);
+	pr_info("Processus %d terminé avec %d\n", is_over, wt->ret_code);
         return wt->ret_code;
 }

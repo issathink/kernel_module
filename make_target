@@ -1,0 +1,53 @@
+#Module loading makefile (on target)
+.PHONY: all
+
+USERNAME=3500480
+HOST_IP=10.0.2.2
+
+HOST_DIR=~/Documents/S2/upmc_pnl/kernel_module
+
+CLIENT_NAME=exec
+CLIENT=test_client/$(CLIENT_NAME)
+
+MODULE_SHORT=mycmd
+MODULE_NAME=$(MODULE_SHORT).ko
+MODULE=module/$(MODULE_NAME)
+
+IOCTL_NAME= /dev/commandes_ioctl
+
+OUT=~/projet
+
+TEST_MODULE:=$(shell lsmod | grep $(MODULE_SHORT) | cut -d" " -f1)
+
+all: get_fast rerun
+install: get_all rerun
+
+get_all: get_client get_module
+get_fast: get_module
+
+get_client:
+	@scp $(USERNAME)@$(HOST_IP):$(HOST_DIR)/$(CLIENT) $(OUT)
+
+get_module:
+	@scp $(USERNAME)@$(HOST_IP):$(HOST_DIR)/$(MODULE) $(OUT)
+
+rerun: clean run
+run: run_test run_module run_ioctl run_client
+
+run_module:
+	@insmod $(OUT)/$(MODULE_NAME)
+
+run_ioctl:
+	@mknod $(IOCTL_NAME) c 245 0
+
+run_client:
+	@$(OUT)/$(CLIENT_NAME)
+
+run_test:
+	@bash test.sh 10&
+
+clean:
+	@rm -f $(IOCTL_NAME)
+ifeq ($(TEST_MODULE), $(MODULE_SHORT))
+	@rmmod $(MODULE_SHORT)
+endif
