@@ -14,9 +14,9 @@ void thread_meminfo(struct work_struct *work_arg)
         res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
 }
 
-int meminfo_handler(struct file *file, no_data *data) 
+int meminfo_handler(struct file *file, struct no_data *data) 
 {
-        struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
+        struct work_task *wt = new_work_task();
         INIT_WORK(&wt->real_work, thread_meminfo);
         wt->thir = data->buf;
         wt->is_bg = data->is_bg;

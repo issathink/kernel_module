@@ -6,16 +6,17 @@ void thread_list(struct work_struct *work_arg)
 	                                                real_work);
 	struct work_task *tmp_wt;
 	char tmp[BUFFER_SIZE];
-	int res; 
+	int res, size; 
 	
 	pr_info("COMMAND LIST TRACE\n");
 	/* printk(KERN_INFO "[Deferred work]=> PID: %d; NAME: %s task ID: %d\n", current->pid, current->comm); */
+	size = scnprintf(tmp, BUFFER_SIZE, "List (ids) of running processes: \n");
 	
 	mutex_lock(&glbl->mut);
-	list_for_each_entry(tmp_wt,&(glbl->head) ,list){
+	list_for_each_entry(tmp_wt, &(glbl->head), list){
 	        pr_info("Commande id : %d!\n", tmp_wt->id);
-		res = scnprintf(tmp, BUFFER_SIZE, "commande id : %d!",tmp_wt->id);
-		res= copy_to_user((char *) c_ptr->sec, tmp, strlen(tmp)+1);
+		size += scnprintf(tmp, BUFFER_SIZE-size, "%d\n", tmp_wt->id);
+		res= copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
 		if(res == 0)
 		        goto copy_pb;
 		
@@ -35,9 +36,9 @@ void thread_list(struct work_struct *work_arg)
 	        return;
 }
 
-void list_handler(struct file *fichier, no_data *data) 
+void list_handler(struct file *fichier, struct no_data *data) 
 {
-	struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
+	struct work_task *wt = new_work_task();
 	INIT_WORK(&wt->real_work, thread_list);
 	wt->first = fichier;
 	wt->thir = data->buf;

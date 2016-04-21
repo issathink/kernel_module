@@ -8,6 +8,7 @@ void thread_kill(struct work_struct *work_arg)
         struct work_task *c_ptr = container_of(work_arg, struct work_task,
                                                         real_work);
         scnprintf(tmp, BUFFER_SIZE, "Je vais print");
+        add_work_task(c_ptr);
         res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
 
         pid_val = find_get_pid(*(int*)c_ptr->first);
@@ -26,9 +27,9 @@ void thread_kill(struct work_struct *work_arg)
         c_ptr->ret_code = ret_code;
 }
 
-int kill_handler(struct file *fichier, kill_data *data)
+int kill_handler(struct file *fichier, struct kill_data *data)
 {
-        struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
+        struct work_task *wt = new_work_task();
 	INIT_WORK(&wt->real_work, thread_kill);
 	wt->first = &data->pid;
 	wt->sec = &data->sig;

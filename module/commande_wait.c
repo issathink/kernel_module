@@ -81,10 +81,10 @@ void thread_wait(struct work_struct *work_arg)
         schedule_delayed_work(&c_ptr->dwork, 60);
 }
 
-int wait_handler(struct file *fichier, wait_data *data)
+int wait_handler(struct file *fichier, struct wait_data *data)
 {
         int i;
-        struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
+        struct work_task *wt = new_work_task();
         struct pid *p;
         struct task_struct *task;
         int c_pid;

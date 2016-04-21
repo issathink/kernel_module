@@ -7,7 +7,7 @@ int main() {
 
         while (fgets(buffer, BUFFER_SIZE , stdin)) {
                   if (strncmp("LIST", buffer, 4) == 0) {
-                        no_data *data = malloc(sizeof(no_data));
+                       struct no_data *data = malloc(sizeof(*data));
                        if (ioctl(fd, LIST, data) == 0)
                                 fprintf(stderr, "%s\n", data->buf);
                         else
@@ -15,7 +15,7 @@ int main() {
                         free(data);
                   } else if (strncmp("KILL ", buffer, 5) == 0) {
                         int sig, pid, ret_code;
-                        kill_data *data = malloc(sizeof(kill_data));
+                        struct kill_data *data = malloc(sizeof(*data));
                         
                         if (!get_kill_params(buffer, &sig, &pid)) {
                                 fprintf(stderr, "Usage : KILL <signal> <pid>\n");
@@ -42,7 +42,7 @@ int main() {
                         fprintf(stderr, "FG\n");
                   } */ else if (strncmp("WAIT", buffer, 4) == 0) {
                         int size, i, ret_code;
-                        wait_data *data = malloc(sizeof(wait_data));
+                        struct wait_data *data = malloc(sizeof(*data));
                         
                         for(i=0; i<NB_MAX_PID; i++)
                                 data->pids[i] = 0;
@@ -71,7 +71,7 @@ int main() {
                        // fprintf(stderr, "\ncmd: %s, size: %d\n", buffer, size);
                         
                   } else if (strncmp("MEMINFO", buffer, 7) == 0) {
-                        no_data *data = malloc(sizeof(no_data));
+                        struct no_data *data = malloc(sizeof(*data));
                         
                         if (ioctl(fd, MEMINFO, data) == 0) {
                                 fprintf(stderr, "%s\n", data->buf);
@@ -80,7 +80,7 @@ int main() {
                         }
                         free(data);
                   } else if (strncmp("MODINFO", buffer, 7) == 0) {
-                        modinfo_data *data = malloc(sizeof(modinfo_data));
+                        struct modinfo_data *data = malloc(sizeof(*data));
                         
                         if (!get_modinfo_param(buffer, data->name)) {
                                 fprintf(stderr, "Usage : MODINFO <pid>\n");

@@ -22,9 +22,9 @@ void thread_modinfo(struct work_struct *work_arg)
         pr_info("thread_modinfo END.\n");  
 }
 
-int modinfo_handler(struct file *file, modinfo_data *data) 
+int modinfo_handler(struct file *file, struct modinfo_data *data) 
 {
-        struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
+        struct work_task *wt = new_work_task();
         INIT_WORK(&wt->real_work, thread_modinfo);
         wt->first = data->name;
         wt->thir = data->buf;

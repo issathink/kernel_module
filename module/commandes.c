@@ -8,8 +8,24 @@ MODULE_AUTHOR(AUTHOR);
 MODULE_DESCRIPTION(DESC);
 MODULE_VERSION("1.0");
 
-/* static int id_last = 0; */
-global *glbl;
+int last_id;
+struct global *glbl;
+
+struct work_task *new_work_task() {
+        struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
+	INIT_LIST_HEAD(&(wt->list));
+        mutex_lock(&(glbl->mut));
+	wt->id = ++last_id;
+	mutex_unlock(&(glbl->mut));
+	return wt;
+}
+
+void add_work_task(struct work_task *ts) {
+	mutex_lock(&(glbl->mut));
+	glbl->size++;
+	list_add(&(ts->list), &(glbl->head));
+	mutex_unlock(&(glbl->mut));
+}
 
 long cmd_ioctl(struct file *fichier, unsigned int req, unsigned long data)
 {
@@ -17,16 +33,16 @@ long cmd_ioctl(struct file *fichier, unsigned int req, unsigned long data)
 	
 	switch (req) {
 	case LIST:
-		list_handler(fichier, (no_data *)data);
+		list_handler(fichier, (struct no_data *)data);
 		return 0; 
 	case KILL:
-	        return kill_handler(fichier, (kill_data*)data);
+	        return kill_handler(fichier, (struct kill_data*)data);
 	case MEMINFO:
-	        return meminfo_handler(fichier, (no_data*)data);
+	        return meminfo_handler(fichier, (struct no_data*)data);
 	case MODINFO:
-	        return modinfo_handler(fichier, (modinfo_data*)data);
+	        return modinfo_handler(fichier, (struct modinfo_data*)data);
 	case WAIT:
-	        return wait_handler(fichier, (wait_data*)data);
+	        return wait_handler(fichier, (struct wait_data*)data);
 	default:
 		pr_info("Commande inconnue: %s\n", (char*) data);
 		return -ENOTTY;
@@ -63,6 +79,7 @@ static int __init entry_point(void)
 	glbl = kmalloc(sizeof(*glbl), GFP_KERNEL);
 	glbl->size = 0;
 	mutex_init(&(glbl->mut));
+	last_id = 0;
 	INIT_LIST_HEAD(&(glbl->head));
 
 	/* INIT_WORK(&glbl->real_work, thread_function); */

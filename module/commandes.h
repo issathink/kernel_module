@@ -22,7 +22,7 @@
 
 #define NAME_SIZE         100
 
-typedef struct work_task {
+struct work_task {
 	int id;
 	void *first;
 	void *sec;
@@ -32,27 +32,31 @@ typedef struct work_task {
 	struct work_struct real_work;
 	struct delayed_work dwork;
 	struct list_head list;
-} work_task;
+};
 
-typedef struct _global {
+struct global {
 	int size;	
 	struct list_head head;
 	struct mutex mut;
-}  global;
+};
 
-extern global *glbl;
+extern struct global *glbl;
+extern int last_id;
+
+struct work_task *new_work_task(void);
+void add_work_task(struct work_task *ts);
 
 void thread_list(struct work_struct *work);
-void list_handler(struct file *fichier, no_data *data);
+void list_handler(struct file *fichier, struct no_data *data);
 
 void thread_kill(struct work_struct *work_arg);
-int kill_handler(struct file *fichier, kill_data *data);
+int kill_handler(struct file *fichier, struct kill_data *data);
 
 void thread_meminfo(struct work_struct *work_arg);
-int meminfo_handler(struct file *file, no_data *data);
+int meminfo_handler(struct file *file, struct no_data *data);
 
 void thread_modinfo(struct work_struct *work_arg);
-int modinfo_handler(struct file *file, modinfo_data *data);
+int modinfo_handler(struct file *file, struct modinfo_data *data);
 
 void thread_wait(struct work_struct *work_arg);
-int wait_handler(struct file *fichier, wait_data *data);
+int wait_handler(struct file *fichier, struct wait_data *data);
