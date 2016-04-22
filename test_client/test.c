@@ -60,7 +60,7 @@ int main() {
                                 /* while(data->res) {
                                         sleep(1);
                                 } */
-                                fprintf(stderr, "End wait: %s.\n\n", data->buf);
+                                fprintf(stderr, "End wait: %s Exit code: %d.\n\n", data->buf, WEXITSTATUS(data->exit_code));
                         } else if (ret_code == -1) {
                                 fprintf(stderr, "He said %s\n", data->buf);
                         } else {

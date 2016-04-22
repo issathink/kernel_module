@@ -48,7 +48,7 @@ int get_kill_params(char *buffer, int *sig, int *pid, int *is_bg) {
  * Fill in name with the first parameter of modinfo.
  * return 1 everything is OK, 0 otherwise
  */
-int get_modinfo_param(char *buffer, char *name, int is_bg) {
+int get_modinfo_param(char *buffer, char *name, int *is_bg) {
         char c_bg;
 
         if (sscanf(buffer, "MODINFO %s %c\n", name, &c_bg) == EOF)

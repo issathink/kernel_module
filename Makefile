@@ -4,11 +4,11 @@ MODULE=./module
 CLIENT=./test_client
 COMMON=./common
 
-KERNELDIR ?= /lib/modules/$(shell uname -r)/build
+KERNELDIR ?= /tmp/linux-4.2.3
 
-all: common make_module make_client
+all: make_common make_module make_client
 
-common:
+make_common:
 	cp $(COMMON)/* $(MODULE)
 	cp $(COMMON)/* $(CLIENT)
 

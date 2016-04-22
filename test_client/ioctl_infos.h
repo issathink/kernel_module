@@ -8,12 +8,14 @@
 struct kill_data {
         int pid;
         int sig;
+        int is_bg;
         char buf[BUFFER_SIZE];
 };
 
 struct wait_data {
         int is_bg;
         char is_over;
+        int exit_code;
         int pids[NB_MAX_PID];
         char buf[BUFFER_SIZE];
 };

@@ -29,6 +29,7 @@ struct work_task {
 	void *thir;
 	int is_bg;
 	int ret_code;
+	int exit_code;
 	struct work_struct real_work;
 	struct delayed_work dwork;
 	struct list_head list;
