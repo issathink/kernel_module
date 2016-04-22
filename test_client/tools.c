@@ -38,6 +38,8 @@ int get_kill_params(char *buffer, int *sig, int *pid, int *is_bg) {
         *pid = strtol(pid_c, &endptr, 10);
         if (errno == ERANGE || (errno != 0 && *pid == 0)) return 0;
         
+        *is_bg = 0;
+        fprintf(stderr, "Kill %c\n", c_bg);
         if(c_bg == '&')
                 *is_bg = 1;
         
@@ -48,13 +50,14 @@ int get_kill_params(char *buffer, int *sig, int *pid, int *is_bg) {
  * Fill in name with the first parameter of modinfo.
  * return 1 everything is OK, 0 otherwise
  */
-int get_modinfo_param(char *buffer, char *name, int *is_bg) {
+int get_modinfo_params(char *buffer, char *name, int *is_bg) {
         char c_bg;
 
         if (sscanf(buffer, "MODINFO %s %c\n", name, &c_bg) == EOF)
                 return 0;
               
         fprintf(stderr, "modinfo name: %s\n", name);
+        *is_bg = 0;
         if(c_bg =='&')
                 *is_bg = 1;
         
@@ -100,41 +103,6 @@ int get_wait_params(char *buffer, int params[], int *size) {
                 memset(tmp, 0, NB_MAX_PID+1);
         }
         *size = j;
-        return j;
-}
-
-/*** Self explanatory. ***/
-int get_wait_params_size(char *buffer) {
-        int i = 0, size = 0;
-        
-        while (buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\0') i++;
-        if(buffer[i] == '\0' || buffer[i] == '\n') return 0;
-        
-        size = 0; i++;
-        while (buffer[i] != '\0') {
-                if((buffer[i] == ' ' || buffer[i] == '\n'))
-                        if((buffer[i+1] != '\0' && buffer[i+1] == '\n'))
-                                size++;
-                i++;
-        }
-        
-        return size;
-}
-
-/*** Self explanatory. ***/
-int get_wait_number_of_params(char *buffer) {
-        int i = 0, j = 0;
-        
-        while (buffer[i] != ' ') i++;
-        if(j == '\0') return 0;
-        
-        j = 1;
-        while (buffer[i] != '\0') {
-                if(buffer[i] == ' ' || buffer[i] == '\n')
-                        j++;
-                i++;
-        }
-        
         return j;
 }
 

@@ -36,7 +36,6 @@ void thread_wait(struct work_struct *work_arg)
                         }
                 }
         }
-        
         schedule_delayed_work(&c_ptr->dwork, 60);
 }
 
@@ -55,7 +54,6 @@ int wait_handler(struct file *fichier, struct wait_data *data)
         wt->thir = kmalloc(sizeof(char)*BUFFER_SIZE, GFP_KERNEL);
 
         is_over = 0;
-
         INIT_DELAYED_WORK(&wt->dwork, thread_wait);
 
         for(i=0; i<NB_MAX_PID; i++)

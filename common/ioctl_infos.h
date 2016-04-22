@@ -9,6 +9,8 @@ struct kill_data {
         int pid;
         int sig;
         int is_bg;
+        int is_over;
+        int bg_id;
         char buf[BUFFER_SIZE];
 };
 
