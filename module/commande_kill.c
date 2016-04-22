@@ -8,7 +8,7 @@ void thread_kill(struct work_struct *work_arg)
         struct work_task *c_ptr = container_of(work_arg, struct work_task,
                                                         real_work);
         scnprintf(tmp, BUFFER_SIZE, "Je vais print");
-        add_work_task(c_ptr);
+        
         res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
 
         pid_val = find_get_pid(*(int*)c_ptr->first);
@@ -35,10 +35,11 @@ int kill_handler(struct file *fichier, struct kill_data *data)
 	wt->sec = &data->sig;
 	wt->thir = data->buf;
 	wt->is_bg = 0;
+	
 	schedule_work(&wt->real_work);
 	flush_work(&wt->real_work);
 
         pr_info("Kill ret_code: %d\n", wt->ret_code);
-        kfree(wt);
+        /* kfree(wt); */
 	return wt->ret_code;
 }

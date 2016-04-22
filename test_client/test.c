@@ -14,16 +14,17 @@ int main() {
                                 fprintf(stderr, "ERREUR LIST\n\n");
                         free(data);
                   } else if (strncmp("KILL ", buffer, 5) == 0) {
-                        int sig, pid, ret_code;
+                        int sig, pid, ret_code, is_bg;
                         struct kill_data *data = malloc(sizeof(*data));
                         
-                        if (!get_kill_params(buffer, &sig, &pid)) {
+                        if (!get_kill_params(buffer, &sig, &pid, &is_bg)) {
                                 fprintf(stderr, "Usage : KILL <signal> <pid>\n");
                                 memset(buffer, 0, BUFFER_SIZE);
                                 continue;
                         }
                         data->pid = pid;
                         data->sig = sig;
+                        data->is_bg = is_bg;
                         if (pid == getpid()) {
                                 fprintf(stderr, "Attempt to kill me, nice try.\n");
                                 memset(buffer, 0, BUFFER_SIZE);
@@ -81,12 +82,14 @@ int main() {
                         free(data);
                   } else if (strncmp("MODINFO", buffer, 7) == 0) {
                         struct modinfo_data *data = malloc(sizeof(*data));
+                        int is_bg;
                         
-                        if (!get_modinfo_param(buffer, data->name)) {
+                        if (!get_modinfo_param(buffer, data->name, &is_bg)) {
                                 fprintf(stderr, "Usage : MODINFO <pid>\n");
                                 free(data);
                                 continue;
                         }
+                        data->is_bg = is_bg;
 
                         if (ioctl(fd, MODINFO, data) == 0) {
                                 fprintf(stderr, "%s\n", data->buf);

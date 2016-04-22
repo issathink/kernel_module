@@ -24,12 +24,12 @@ int is_string_entier(char *buf) {
  * Parse buffer and fill sig and pid.
  * return non zero value if OK, 0 otherwise
  */
-int get_kill_params(char *buffer, int *sig, int *pid) {
-        char sig_c[20], pid_c[20], *endptr;
+int get_kill_params(char *buffer, int *sig, int *pid, int *is_bg) {
+        char sig_c[20], pid_c[20], *endptr, c_bg;
         memset(sig_c, 0, 20);;
         memset(pid_c, 0, 20);
         
-        sscanf(buffer, "KILL %s %s\n", sig_c, pid_c);        
+        sscanf(buffer, "KILL %s %s %c\n", sig_c, pid_c, &c_bg);        
         if(!is_string_entier(sig_c) || !is_string_entier(pid_c))
                 return 0;
                 
@@ -38,6 +38,9 @@ int get_kill_params(char *buffer, int *sig, int *pid) {
         *pid = strtol(pid_c, &endptr, 10);
         if (errno == ERANGE || (errno != 0 && *pid == 0)) return 0;
         
+        if(c_bg == '&')
+                *is_bg = 1;
+        
         return 1;
 }
 
@@ -45,11 +48,16 @@ int get_kill_params(char *buffer, int *sig, int *pid) {
  * Fill in name with the first parameter of modinfo.
  * return 1 everything is OK, 0 otherwise
  */
-int get_modinfo_param(char *buffer, char *name) {
-        if (sscanf(buffer, "MODINFO %s\n", name) == EOF)
+int get_modinfo_param(char *buffer, char *name, int is_bg) {
+        char c_bg;
+
+        if (sscanf(buffer, "MODINFO %s %c\n", name, &c_bg) == EOF)
                 return 0;
               
         fprintf(stderr, "modinfo name: %s\n", name);
+        if(c_bg =='&')
+                *is_bg = 1;
+        
         return 1;
 }
 

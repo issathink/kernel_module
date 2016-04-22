@@ -13,7 +13,7 @@ struct global *glbl;
 
 struct work_task *new_work_task() {
         struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
-	INIT_LIST_HEAD(&(wt->list));
+	/* INIT_LIST_HEAD(&(wt->list)); */
         mutex_lock(&(glbl->mut));
 	wt->id = ++last_id;
 	mutex_unlock(&(glbl->mut));
