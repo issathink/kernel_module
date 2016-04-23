@@ -17,7 +17,7 @@ void thread_wait(struct work_struct *work_arg)
         for(i=0; i<NB_MAX_PID; i++) {
                 task = ((struct task_struct **)(c_ptr->sec))[i];
                 
-                if(task != NULL) {
+                if (task != NULL) {
                         task_lock(task);
                         alive = pid_alive(task);
                         if (!alive) {
@@ -80,7 +80,7 @@ int wait_handler(struct file *fichier, struct wait_data *data)
                 }
         }
 
-        if(no_proc > 0) {
+        if (no_proc > 0) {
         	wt->is_bg = data->is_bg;
         	schedule_delayed_work(&wt->dwork, 60);
         	flush_delayed_work(&wt->dwork);

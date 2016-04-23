@@ -24,12 +24,13 @@
 
 struct work_task {
 	int id;
-	void *first;
-	void *sec;
-	void *thir;
 	int is_bg;
 	int ret_code;
 	int exit_code;
+	void *first;
+	void *sec;
+	void *thir;
+        char tmp_buf[BUFFER_SIZE];
 	struct work_struct real_work;
 	struct delayed_work dwork;
 	struct list_head list;

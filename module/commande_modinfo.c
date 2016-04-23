@@ -24,6 +24,7 @@ void thread_modinfo(struct work_struct *work_arg)
 
 int modinfo_handler(struct file *file, struct modinfo_data *data) 
 {
+        int ret_code;
         struct work_task *wt = new_work_task();
         INIT_WORK(&wt->real_work, thread_modinfo);
         wt->first = data->name;
@@ -33,6 +34,8 @@ int modinfo_handler(struct file *file, struct modinfo_data *data)
 	flush_work(&wt->real_work);
 	
         pr_info("Modinfo ret_code: %d\n", wt->ret_code);
+        
+        ret_code = wt->ret_code;
         kfree(wt);
-	return wt->ret_code;
+	return ret_code;
 }

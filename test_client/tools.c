@@ -26,7 +26,7 @@ int is_string_entier(char *buf) {
  */
 int get_kill_params(char *buffer, int *sig, int *pid, int *is_bg) {
         char sig_c[20], pid_c[20], *endptr, c_bg;
-        memset(sig_c, 0, 20);;
+        memset(sig_c, 0, 20);
         memset(pid_c, 0, 20);
         
         sscanf(buffer, "KILL %s %s %c\n", sig_c, pid_c, &c_bg);        
@@ -106,3 +106,22 @@ int get_wait_params(char *buffer, int params[], int *size) {
         return j;
 }
 
+/*
+ * Fill in id with the parameter if it's a real integer.
+ * return 1 OK, 0 first parameter not an int
+ */
+int get_fg_params(char *buffer, int *id)
+{
+        char id_c[20], *endptr;
+        memset(id_c, 0, 20);
+
+        if (sscanf(buffer, "FG %s\n", id_c) == EOF)
+                return 0;
+        if(!is_string_entier(id_c))
+                return 0;
+                
+        *id = strtol(id_c, &endptr, 10);
+        if (errno == ERANGE || (errno != 0 && *id == 0)) return 0;
+
+        return 1;
+}
