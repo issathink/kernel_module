@@ -27,6 +27,7 @@ struct work_task {
 	int is_bg;
 	int ret_code;
 	int exit_code;
+	int is_over;
 	void *first;
 	void *sec;
 	void *thir;
@@ -40,6 +41,7 @@ struct global {
 	int size;	
 	struct list_head head;
 	struct mutex mut;
+	wait_queue_head_t wqh;
 };
 
 extern struct global *glbl;
@@ -50,6 +52,9 @@ void add_work_task(struct work_task *ts);
 
 void thread_list(struct work_struct *work);
 void list_handler(struct file *fichier, struct no_data *data);
+
+void thread_fg(struct work_struct *work_arg);
+int fg_handler(struct file *fichier, struct fg_data *data);
 
 void thread_kill(struct work_struct *work_arg);
 int kill_handler(struct file *fichier, struct kill_data *data);

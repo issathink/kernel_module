@@ -4,7 +4,7 @@
 ifneq ($(KERNELRELEASE),)
 
 obj-m := mycmd.o
-mycmd-objs := commandes.o commande_list.o commande_kill.o commande_meminfo.o commande_modinfo.o commande_wait.o
+mycmd-objs := commandes.o commande_list.o commande_kill.o commande_meminfo.o commande_modinfo.o commande_wait.o commande_fg.o
 
 else
 	

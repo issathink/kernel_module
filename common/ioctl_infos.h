@@ -25,6 +25,7 @@ struct wait_data {
 struct modinfo_data {
         char name[100];
         int is_bg;
+        int is_over;
         char buf[BUFFER_SIZE];
 };
 

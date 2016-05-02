@@ -38,7 +38,6 @@ int main() {
                                 memset(buffer, 0, BUFFER_SIZE);
                                 continue;
                         }
-                        
                         data->pid = pid;
                         data->sig = sig;
                         data->is_bg = is_bg;
@@ -51,7 +50,7 @@ int main() {
                         }
                         
                         if ((ret_code = ioctl(fd, KILL, data)) == 0) {
-                                fprintf(stderr, "Successfuly killed process pid: %d.\n\n", pid);
+                                fprintf(stderr, "%s\n\n", data->buf);
                         } else if (ret_code == -1) { 
                                 fprintf(stderr, "No process with pid : %d\n\n", pid);
                         } else {
@@ -111,7 +110,7 @@ int main() {
                         if (ioctl(fd, MODINFO, data) == 0) {
                                 fprintf(stderr, "%s\n", data->buf);
                         } else {
-                                fprintf(stderr, "No such module %s\n\n", data->name);
+                                fprintf(stderr, "Unexpected error.\n\n");
                         }
                         free(data);
                   } else if(strncasecmp("help", buffer, 4) == 0) {

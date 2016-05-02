@@ -14,11 +14,11 @@ void thread_list(struct work_struct *work_arg)
         mutex_lock(&glbl->mut);
         list_for_each_entry(tmp_wt, &(glbl->head), list){
 	        size += scnprintf(tmp+size, BUFFER_SIZE-size, "%d\n", tmp_wt->id);
-                res = copy_to_user((char *) (c_ptr->thir), tmp, strlen(tmp)+1);
-                if (res != 0)
-                        goto copy_pb;
         }
         mutex_unlock(&glbl->mut);
+        res = copy_to_user((char *) (c_ptr->thir), tmp, strlen(tmp)+1);
+        if (res != 0)
+                goto copy_pb;
 	
         pr_info("COMMAND LIST END\n");
         return;

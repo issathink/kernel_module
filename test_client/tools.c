@@ -39,7 +39,6 @@ int get_kill_params(char *buffer, int *sig, int *pid, int *is_bg) {
         if (errno == ERANGE || (errno != 0 && *pid == 0)) return 0;
         
         *is_bg = 0;
-        fprintf(stderr, "Kill %c\n", c_bg);
         if(c_bg == '&')
                 *is_bg = 1;
         
