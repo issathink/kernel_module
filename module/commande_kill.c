@@ -16,6 +16,7 @@ void thread_kill(struct work_struct *work_arg)
         }
         if (c_ptr->is_bg) {
                 pr_info("Je rajoute ds la liste des bg (id: %d)\n", c_ptr->id);
+                c_ptr->tmp_buf[0] = 0;
                 add_work_task(c_ptr);
         }
         
@@ -41,14 +42,14 @@ void thread_kill(struct work_struct *work_arg)
 int kill_handler(struct file *fichier, struct kill_data *data)
 {
         struct work_task *wt = new_work_task();
-	INIT_WORK(&wt->real_work, thread_kill);
-	wt->first = &data->pid;
-	wt->sec = &data->sig;
-	wt->thir = data->buf;
-	wt->is_bg = data->is_bg;
-	
-	schedule_work(&wt->real_work);
-	flush_work(&wt->real_work);
+        INIT_WORK(&wt->real_work, thread_kill);
+        wt->first = &data->pid;
+        wt->sec = &data->sig;
+        wt->thir = data->buf;
+        wt->is_bg = data->is_bg;
+
+        schedule_work(&wt->real_work);
+        flush_work(&wt->real_work);
 
         pr_info("Kill ret_code: %d\n", wt->ret_code);
         /** Free data if it's on foreground otherwise it will be freed when 
@@ -57,5 +58,5 @@ int kill_handler(struct file *fichier, struct kill_data *data)
                 pr_info("Il n'est pas en bg donc je peux le liberer\n");
                 kfree(wt);
         }
-	return wt->ret_code;
+        return wt->ret_code;
 }

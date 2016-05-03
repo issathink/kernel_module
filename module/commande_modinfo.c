@@ -2,23 +2,33 @@
  
 void thread_modinfo(struct work_struct *work_arg)
 {
-        struct work_task *c_ptr = container_of(work_arg, struct work_task, 
+        struct work_task *c_ptr = container_of(work_arg, struct work_task,
                                                         real_work);
         struct module *mod;
         char tmp[BUFFER_SIZE];
-        int res;
         
-        res = copy_from_user(tmp, (char*)c_ptr->first, strlen(c_ptr->first)+1);
+        copy_from_user(tmp, (char*)c_ptr->first, strlen(c_ptr->first)+1);
         mod = find_module(tmp);
+        
+        if (c_ptr->is_bg) {
+                pr_info("Je rajoute ds la liste des bg (id: %d)\n", c_ptr->id);
+                c_ptr->tmp_buf[0] = 0;
+                add_work_task(c_ptr);
+        }
         
         if (mod == NULL) {
                 c_ptr->ret_code = -1;
-                res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
-                return;
+                scnprintf(c_ptr->tmp_buf, BUFFER_SIZE, "Could not find module named : '%s'\n", tmp);
+                copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
+        } else {
+                scnprintf(c_ptr->tmp_buf, BUFFER_SIZE, "Name: %s\nVersion: %s\nArgs: %s\nLoad adress: %p\n", mod->name, mod->version, mod->args, mod);
+                copy_to_user((char *) c_ptr->thir, c_ptr->tmp_buf,
+                                        strlen(c_ptr->tmp_buf)+1);
+                c_ptr->ret_code = 0;
         }
-        res = scnprintf(tmp, BUFFER_SIZE, "Name: %s\nVersion: %s\nArgs: %s\nLoad adress: %p\n", mod->name, mod->version, mod->args, mod);
-        res = copy_to_user((char *) c_ptr->thir, tmp, strlen(tmp)+1);
-        c_ptr->ret_code = 0;
+        c_ptr->is_over = 1;
+        pr_info("Je vais wake quelqu'un is_over = %d\n", c_ptr->is_over);
+        wake_up(&(glbl->wqh));
         pr_info("thread_modinfo END.\n");  
 }
 
@@ -31,11 +41,13 @@ int modinfo_handler(struct file *file, struct modinfo_data *data)
         wt->thir = data->buf;
         wt->is_bg = data->is_bg;
         schedule_work(&wt->real_work);
-	flush_work(&wt->real_work);
-	
-        pr_info("Modinfo ret_code: %d\n", wt->ret_code);
-        
-        ret_code = wt->ret_code;
-        kfree(wt);
-	return ret_code;
+
+        if (!data->is_bg) {
+                flush_work(&wt->real_work);
+                ret_code = wt->ret_code;
+                kfree(wt);
+                pr_info("Modinfo ret_code: %d\n", ret_code);
+                return ret_code;
+        }
+        return 0;
 }

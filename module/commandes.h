@@ -23,25 +23,25 @@
 #define NAME_SIZE         100
 
 struct work_task {
-	int id;
-	int is_bg;
-	int ret_code;
-	int exit_code;
-	int is_over;
-	void *first;
-	void *sec;
-	void *thir;
+        int id;
+        int is_bg;
+        int ret_code;
+        int exit_code;
+        int is_over;
+        void *first;
+        void *sec;
+        void *thir;
         char tmp_buf[BUFFER_SIZE];
-	struct work_struct real_work;
-	struct delayed_work dwork;
-	struct list_head list;
+        struct work_struct real_work;
+        struct delayed_work dwork;
+        struct list_head list;
 };
 
 struct global {
-	int size;	
-	struct list_head head;
-	struct mutex mut;
-	wait_queue_head_t wqh;
+        int size;	
+        struct list_head head;
+        struct mutex mut;
+        wait_queue_head_t wqh;
 };
 
 extern struct global *glbl;

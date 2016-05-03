@@ -14,16 +14,16 @@ struct global *glbl;
 struct work_task *new_work_task() {
         struct work_task *wt = kmalloc(sizeof(struct work_task), GFP_KERNEL);
         mutex_lock(&(glbl->mut));
-	wt->id = ++last_id;
-	mutex_unlock(&(glbl->mut));
-	return wt;
+        wt->id = ++last_id;
+        mutex_unlock(&(glbl->mut));
+        return wt;
 }
 
 void add_work_task(struct work_task *ts) {
-	mutex_lock(&(glbl->mut));
-	glbl->size++;
-	list_add(&(ts->list), &(glbl->head));
-	mutex_unlock(&(glbl->mut));
+        mutex_lock(&(glbl->mut));
+        glbl->size++;
+        list_add(&(ts->list), &(glbl->head));
+        mutex_unlock(&(glbl->mut));
 }
 
 long cmd_ioctl(struct file *fichier, unsigned int req, unsigned long data)
@@ -53,25 +53,25 @@ int major;
 
 static int __init entry_point(void) 
 {
-	major = register_chrdev(0, "commandes_ioctl", &fop);
+        major = register_chrdev(0, "commandes_ioctl", &fop);
 
-	glbl = kmalloc(sizeof(*glbl), GFP_KERNEL);
-	glbl->size = 0;
-	mutex_init(&(glbl->mut));
-	init_waitqueue_head(&(glbl->wqh));
-	last_id = 0;
-	INIT_LIST_HEAD(&(glbl->head));
-	pr_info("Load module major: %d\n", major);
+        glbl = kmalloc(sizeof(*glbl), GFP_KERNEL);
+        glbl->size = 0;
+        mutex_init(&(glbl->mut));
+        init_waitqueue_head(&(glbl->wqh));
+        last_id = 0;
+        INIT_LIST_HEAD(&(glbl->head));
+        pr_info("Load module major: %d\n", major);
 
-	return 0;
+        return 0;
 }
 
 static void __exit exit_point(void) 
 {
-	unregister_chrdev(major, "commandes_ioctl");
-	kfree(glbl);
-	pr_info("Unload\n");
-	return;
+        unregister_chrdev(major, "commandes_ioctl");
+        kfree(glbl);
+        pr_info("Unload\n");
+        return;
 }
 
 module_init(entry_point);
