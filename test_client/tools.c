@@ -54,8 +54,7 @@ int get_modinfo_params(char *buffer, char *name, int *is_bg) {
 
         if (sscanf(buffer, "MODINFO %s %c\n", name, &c_bg) == EOF)
                 return 0;
-              
-        fprintf(stderr, "modinfo name: %s\n", name);
+
         *is_bg = 0;
         if(c_bg =='&')
                 *is_bg = 1;

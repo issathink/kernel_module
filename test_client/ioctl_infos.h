@@ -6,38 +6,38 @@
 #define NB_MAX_PID 10
 
 struct kill_data {
-        int pid;
-        int sig;
-        int is_bg;
-        int is_over;
-        int bg_id;
-        char buf[BUFFER_SIZE];
+	int pid;
+	int sig;
+	int is_bg;
+	int is_over;
+	int bg_id;
+	char buf[BUFFER_SIZE];
 };
 
 struct wait_data {
-        int is_bg;
-        char is_over;
-        int exit_code;
-        int pids[NB_MAX_PID];
-        char buf[BUFFER_SIZE];
+	int is_bg;
+	char is_over;
+	int exit_code;
+	int pids[NB_MAX_PID];
+	char buf[BUFFER_SIZE];
 };
 
 struct modinfo_data {
-        char name[100];
-        int is_bg;
-        int is_over;
-        char buf[BUFFER_SIZE];
+	char name[100];
+	int is_bg;
+	int is_over;
+	char buf[BUFFER_SIZE];
 };
 
 struct fg_data {
-        int cmd_id;
-        int is_bg;
-        char buf[BUFFER_SIZE];
+	int cmd_id;
+	int is_bg;
+	char buf[BUFFER_SIZE];
 };
 
 struct no_data {
-        int is_bg;
-        char buf[BUFFER_SIZE];
+	int is_bg;
+	char buf[BUFFER_SIZE];
 };
 
 #define         LIST               _IOR(NUM_MAGIQUE_HELLO, 0, struct no_data *)

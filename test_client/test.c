@@ -14,7 +14,8 @@ int main() {
                         free(data);
                   } else if (strncmp("FG", buffer, 2) == 0) {
                         struct fg_data *data = malloc(sizeof(*data));
-                        int ret_code;
+                        memset(data->buf, 0, BUFFER_SIZE);
+			int ret_code;
                         
                         if(!get_fg_params(buffer, &data->cmd_id)) {
                                 free(data);
@@ -23,12 +24,11 @@ int main() {
                         }
                         
                         if ((ret_code = ioctl(fd, FG, data)) == 0) {
-                                fprintf(stderr, "FG : %s.\n", data->buf);
+			  fprintf(stderr, "FG (id:%d): \n%s\n\n", data->cmd_id, data->buf);
                         } else {
                                 fprintf(stderr, "Unexpected error.\n\n");
                         }
                         free(data);
-                        
                   } else if (strncmp("KILL ", buffer, 5) == 0) {
                         int sig, pid, ret_code, is_bg;
                         struct kill_data *data = malloc(sizeof(*data));
@@ -41,7 +41,8 @@ int main() {
                         data->pid = pid;
                         data->sig = sig;
                         data->is_bg = is_bg;
-                        
+			memset(data->buf, 0, BUFFER_SIZE);                        
+
                         if (pid == getpid()) {
                                 fprintf(stderr, "Attempt to kill me, nice try.\n\n");
                                 memset(buffer, 0, BUFFER_SIZE);
@@ -56,8 +57,7 @@ int main() {
                         } else {
                                 fprintf(stderr, "Error when trying to kill : %d\n\n", pid);
                         }
-                        if(!is_bg)
-                                free(data);
+                        free(data);
                        // fprintf(stderr, "Background kill id: %d.\n\n", data->bg_id);
                   
                   } else if (strncmp("WAIT", buffer, 4) == 0) {
@@ -87,25 +87,26 @@ int main() {
                         struct no_data *data = malloc(sizeof(*data));
                         sscanf(buffer, "MEMINFO %c\n", &c_bg);
                         data->is_bg = c_bg == '&' ? 1 : 0;
-                        ret_code = ioctl(fd, MEMINFO, data);
+                        memset(data->buf, 0, BUFFER_SIZE);
+			ret_code = ioctl(fd, MEMINFO, data);
                         
                         if (ret_code == 0) {
                                 fprintf(stderr, "%s\n\n", data->buf);
                         } else {
                                 fprintf(stderr, "Unexpected error.\n\n");
                         }
-                        if (!data->is_bg)
-                                free(data);
+                        free(data);
                   } else if (strncmp("MODINFO", buffer, 7) == 0) {
                         struct modinfo_data *data = malloc(sizeof(*data));
                         int is_bg;
                         
                         if (!get_modinfo_params(buffer, data->name, &is_bg)) {
-                                fprintf(stderr, "Usage : MODINFO <pid> [&]\n\n");
+                                fprintf(stderr, "Usage : MODINFO <name> [&]\n\n");
                                 free(data);
                                 continue;
                         }
                         data->is_bg = is_bg;
+			memset(data->buf, 0, BUFFER_SIZE);
 
                         if (ioctl(fd, MODINFO, data) == 0) {
                                 fprintf(stderr, "%s\n", data->buf);
