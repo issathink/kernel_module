@@ -1,17 +1,17 @@
 /**************** Projet PNL ****************/ 
 /////////// Invite de commande pour le noyau Linux ///////////
-____________________________________________
+_____________________________________________________
 |---------- Nom: Mahamat Issa Abderahim ------------|
-|---------- Numero etudiant : 3362755         ---------|
-|---------- @issathink - github.com/issathink ---------|
-|__________________ ________________________|               
+|---------- Numero etudiant : 3362755         ------|
+|---------- @issathink - github.com/issathink ------|
+|__________________ ________________________________|               
 Structure du Projet :
 
 Projet
 ├── common :                                    repertoire contenant le fichier header a partager entre le module et le client
 │   └── ioctl_infos.h
-├── Makefile                                       Makefile general
-├── module                                        code source du module
+├── Makefile                                    Makefile general
+├── module                                      code source du module
 │   ├── commande_fg.c
 │   ├── commande_kill.c
 │   ├── commande_list.c
@@ -23,7 +23,7 @@ Projet
 │   ├── ioctl_infos.h
 │   ├── Makefile
 ├── README.txt
-├── swapfile.patch.xz                       patch a appliquer au noyau
+├── swapfile.patch.xz                           patch a appliquer au noyau
 ├── test_client                                 repertoire de l'outil pour tester le module
 │   ├── exec
 │   ├── ioctl_infos.h
