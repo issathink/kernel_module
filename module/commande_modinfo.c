@@ -10,10 +10,8 @@ void thread_modinfo(struct work_struct *work_arg)
 	copy_from_user(tmp, (char *)c_ptr->first, strlen(c_ptr->first)+1);
 	mod = find_module(tmp);
 
-	if (c_ptr->is_bg) {
-		pr_info("Je rajoute ds la liste des bg (id: %d)\n", c_ptr->id);
+	if (c_ptr->is_bg)
 		add_work_task(c_ptr);
-	}
 	if (mod == NULL) {
 		c_ptr->ret_code = -1;
 		memset(c_ptr->tmp_buf, 0, BUFFER_SIZE);
