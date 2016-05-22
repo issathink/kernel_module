@@ -7,7 +7,7 @@ void thread_meminfo(struct work_struct *work_arg)
 	struct sysinfo val;
 
 	si_meminfo(&val);
-	si_swapinfo(&val); /** patcher le noyau en exportant la fonction **/
+	si_swapinfo(&val); /* need a patch, si_swapinfo isn't exported */
 
 	if (c_ptr->is_bg)
 		add_work_task(c_ptr);
