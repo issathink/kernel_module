@@ -32,7 +32,7 @@ int fg_handler(struct file *fichier, struct fg_data *data)
 		scnprintf(tmp, BUFFER_SIZE, "Task with id: %d not found\n", data->cmd_id);
 		copy_to_user(data->buf, tmp, strlen(tmp)+1);
 	} else {
-		list_del(&tmp_wt->list); /* Supprimer le work de liste des taches en bg */
+		list_del(&tmp_wt->list); /* Delete the task from bg tasks */
 		tmp_wt->thir = data->buf;
 		if (found && glbl->size > 0)
 			glbl->size--;
