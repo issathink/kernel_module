@@ -40,10 +40,10 @@ struct no_data {
 	char buf[BUFFER_SIZE];
 };
 
-#define         LIST               _IOR(NUM_MAGIQUE_HELLO, 0, struct no_data *)
-#define         FG                 _IOR(NUM_MAGIQUE_HELLO, 1, struct fg_data *)
-#define         KILL             _IOR(NUM_MAGIQUE_HELLO, 2, struct kill_data *)
-#define         WAIT             _IOR(NUM_MAGIQUE_HELLO, 3, struct wait_data *)
+#define         LIST        _IOR(NUM_MAGIQUE_HELLO, 0, struct no_data *)
+#define         FG          _IOR(NUM_MAGIQUE_HELLO, 1, struct fg_data *)
+#define         KILL        _IOR(NUM_MAGIQUE_HELLO, 2, struct kill_data *)
+#define         WAIT        _IOR(NUM_MAGIQUE_HELLO, 3, struct wait_data *)
 #define         MEMINFO     _IOR(NUM_MAGIQUE_HELLO, 4, struct no_data *)
 #define         MODINFO     _IOR(NUM_MAGIQUE_HELLO, 5, struct modinfo_data *)
 
